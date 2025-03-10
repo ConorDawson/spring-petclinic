@@ -4,6 +4,8 @@ pipeline {
     environment {
         IMAGE_NAME = "cinir21/spring-petclinic"
         CONTAINER_REGISTRY = "docker.io"
+        DOCKER_USER = "cinir21"
+        DOCKER_PASS = "Avacado1?"
     }
 
     stages {
@@ -27,9 +29,7 @@ pipeline {
 
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                }
+                sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
             }
         }
 
