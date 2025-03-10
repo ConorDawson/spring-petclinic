@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "conordawson/spring-petclinic"
+        IMAGE_NAME = "cinir21/spring-petclinic"
         CONTAINER_REGISTRY = "docker.io"
     }
 
