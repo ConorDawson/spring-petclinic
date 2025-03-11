@@ -1,8 +1,8 @@
 # Use a modern, official OpenJDK Alpine image
-FROM openjdk:11-jdk-alpine
+FROM openjdk:11-jdk
 
 # Set a maintainer label
-LABEL maintainer="ConorDawson"
+LABEL maintainer="cinir21"
 
 # Set a working directory
 WORKDIR /home
