@@ -1,28 +1,32 @@
-#!groovy
 pipeline {
     agent any
 
-    stages {     
+    environment {
+        IMAGE_NAME = 'cinir21/spring-petclinic:latest'
+    }
+
+    stages {
         stage('Maven Install') {
-            agent {         
-                docker { image 'maven:3.8.7' }       
-            }       
             steps {
-                sh 'mvn clean install'
+                bat '''
+                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 mvn clean install
+                '''
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t cinir21/spring-petclinic:latest .'
+                bat 'docker build -t %IMAGE_NAME% .'
             }
         }
 
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-                    sh 'echo "$dockerHubPassword" | docker login -u "$dockerHubUser" --password-stdin'
-                    sh 'docker push cinir21/spring-petclinic:latest'
+                    bat '''
+                    echo %dockerHubPassword% | docker login -u %dockerHubUser% --password-stdin
+                    docker push %IMAGE_NAME%
+                    '''
                 }
             }
         }
