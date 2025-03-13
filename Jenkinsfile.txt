@@ -8,11 +8,15 @@ pipeline {
 
     stages {
 
-        stage('Pre-Clean') {
+       stage('Pre-Clean') {
     steps {
-        bat 'docker run --rm -v "%CD%":/app -w /app maven:3.8.7 rm -rf /app/target'
+        bat '''
+        docker run --rm -v "%CD%":/app -w /app maven:3.8.7 chmod -R 777 /app/target
+        docker run --rm -v "%CD%":/app -w /app maven:3.8.7 rm -rf /app/target
+        '''
     }
 }
+
 
 
         stage('Maven Install') {
