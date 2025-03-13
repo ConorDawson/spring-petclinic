@@ -33,21 +33,34 @@ pipeline {
             }
         }
 
-        stage('Deploy Prometheus and Grafana') {
-            steps {
-                script {
-                    // Deploy Prometheus
-                    bat '''
-                    docker run -d --name=prometheus -p 9090:9090 %PROMETHEUS_IMAGE%
-                    '''
+       stage('Deploy Prometheus and Grafana') {
+    steps {
+        script {
+            // Stop and remove any existing Prometheus container
+            bat '''
+            docker stop prometheus || echo "No Prometheus container to stop"
+            docker rm prometheus || echo "No Prometheus container to remove"
+            '''
 
-                    // Deploy Grafana
-                    bat '''
-                    docker run -d --name=%GRAFANA_CONTAINER_NAME% -p 3000:3000 %GRAFANA_IMAGE%
-                    '''
-                }
-            }
+            // Deploy Prometheus
+            bat '''
+            docker run -d --name=prometheus -p 9090:9090 %PROMETHEUS_IMAGE%
+            '''
+
+            // Stop and remove any existing Grafana container
+            bat '''
+            docker stop %GRAFANA_CONTAINER_NAME% || echo "No Grafana container to stop"
+            docker rm %GRAFANA_CONTAINER_NAME% || echo "No Grafana container to remove"
+            '''
+
+            // Deploy Grafana
+            bat '''
+            docker run -d --name=%GRAFANA_CONTAINER_NAME% -p 3000:3000 %GRAFANA_IMAGE%
+            '''
         }
+    }
+}
+
 
         stage('Deploy Application') {
             steps {
