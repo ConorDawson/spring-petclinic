@@ -4,45 +4,28 @@ pipeline {
     environment {
         IMAGE_NAME = 'cinir21/spring-petclinic:latest'
         CONTAINER_NAME = 'spring-petclinic'
+        GRAFANA_CONTAINER_NAME = 'grafana'
+        PROMETHEUS_CONTAINER_NAME = 'prometheus'
     }
 
     stages {
-
-        stage('Pre-Clean') {
+        stage('Deploy Prometheus and Grafana') {
             steps {
-                bat '''
-                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 chmod -R 777 /app/target
-                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 rm -rf /app/target
-                '''
-            }
-        }
-
-        stage('Maven Install') {
-            steps {
-                bat '''
-                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 mvn clean install
-                '''
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                bat 'docker build -t %IMAGE_NAME% .'
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                script {
+                    echo "Deploying Prometheus..."
                     bat '''
-                    echo %dockerHubPassword% | docker login -u %dockerHubUser% --password-stdin
-                    docker push %IMAGE_NAME%
+                    docker run -d --name=%PROMETHEUS_CONTAINER_NAME% -p 9090:9090 prom/prometheus:latest
+                    '''
+
+                    echo "Deploying Grafana..."
+                    bat '''
+                    docker run -d --name=%GRAFANA_CONTAINER_NAME% -p 3000:3000 grafana/grafana:latest
                     '''
                 }
             }
         }
 
-        stage('Deploy Container') {
+        stage('Deploy Application') {
             steps {
                 bat '''
                 docker stop %CONTAINER_NAME% || echo "No container to stop"
@@ -53,6 +36,4 @@ pipeline {
             }
         }
     }
-
-    
 }
