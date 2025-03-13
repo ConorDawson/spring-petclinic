@@ -5,21 +5,45 @@ pipeline {
         IMAGE_NAME = 'cinir21/spring-petclinic:latest'
         CONTAINER_NAME = 'spring-petclinic'
         GRAFANA_CONTAINER_NAME = 'grafana'
-        PROMETHEUS_CONTAINER_NAME = 'prometheus'
+        PROMETHEUS_IMAGE = 'prom/prometheus:latest'
+        GRAFANA_IMAGE = 'grafana/grafana:latest'
     }
 
     stages {
+        stage('Pre-Clean') {
+            steps {
+                bat '''
+                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 chmod -R 777 /app/target
+                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 rm -rf /app/target
+                '''
+            }
+        }
+
+        stage('Maven Install') {
+            steps {
+                bat '''
+                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 mvn clean install
+                '''
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                bat 'docker build -t %IMAGE_NAME% .'
+            }
+        }
+
         stage('Deploy Prometheus and Grafana') {
             steps {
                 script {
-                    echo "Deploying Prometheus..."
+                    // Deploy Prometheus
                     bat '''
-                    docker run -d --name=%PROMETHEUS_CONTAINER_NAME% -p 9090:9090 prom/prometheus:latest
+                    docker run -d --name=prometheus -p 9090:9090 %PROMETHEUS_IMAGE%
                     '''
 
-                    echo "Deploying Grafana..."
+                    // Deploy Grafana
                     bat '''
-                    docker run -d --name=%GRAFANA_CONTAINER_NAME% -p 3000:3000 grafana/grafana:latest
+                    docker run -d --name=%GRAFANA_CONTAINER_NAME% -p 3000:3000 %GRAFANA_IMAGE%
                     '''
                 }
             }
@@ -34,6 +58,22 @@ pipeline {
                 docker run -d --name %CONTAINER_NAME% -p 8086:8080 %IMAGE_NAME%
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            emailext (
+                subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                <p>Build Status: ${currentBuild.currentResult}</p>
+                <p>Job: ${env.JOB_NAME}</p>
+                <p>Build Number: ${env.BUILD_NUMBER}</p>
+                <p>URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                """,
+                to: "conordawson1409@gmail.com",
+                mimeType: 'text/html'
+            )
         }
     }
 }
