@@ -47,7 +47,7 @@ pipeline {
         }
     }
 
-    post {
+   post {
         always {
             emailext (
                 subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -56,6 +56,7 @@ pipeline {
                 <p>Job: ${env.JOB_NAME}</p>
                 <p>Build Number: ${env.BUILD_NUMBER}</p>
                 <p>URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                <p>Deployment of ${env.JOB_NAME} is complete.</p>
                 """,
                 to: "conordawson1409@gmail.com",
                 mimeType: 'text/html'
