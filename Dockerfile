@@ -1,6 +1,5 @@
 # Use a modern, official OpenJDK Alpine image
-FROM openjdk:11-jdk
-
+FROM openjdk:17-jdk-slim
 # Set a maintainer label
 LABEL maintainer="cinir21"
 
