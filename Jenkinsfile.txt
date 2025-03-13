@@ -8,16 +8,14 @@ pipeline {
 
     stages {
 
-       stage('Pre-Clean') {
-    steps {
-        bat '''
-        docker run --rm -v "%CD%":/app -w /app maven:3.8.7 chmod -R 777 /app/target
-        docker run --rm -v "%CD%":/app -w /app maven:3.8.7 rm -rf /app/target
-        '''
-    }
-}
-
-
+        stage('Pre-Clean') {
+            steps {
+                bat '''
+                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 chmod -R 777 /app/target
+                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 rm -rf /app/target
+                '''
+            }
+        }
 
         stage('Maven Install') {
             steps {
@@ -53,6 +51,22 @@ pipeline {
                 docker run -d --name %CONTAINER_NAME% -p 8086:8080 %IMAGE_NAME%
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            emailext (
+                subject: "Jenkins Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                <p>Build Status: ${currentBuild.currentResult}</p>
+                <p>Job: ${env.JOB_NAME}</p>
+                <p>Build Number: ${env.BUILD_NUMBER}</p>
+                <p>URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                """,
+                to: "conordawson1409@gmail.com",
+                mimeType: 'text/html'
+            )
         }
     }
 }
