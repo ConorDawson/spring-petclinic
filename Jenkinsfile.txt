@@ -22,7 +22,7 @@ pipeline {
         stage('Maven Install') {
             steps {
                 bat '''
-                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 mvn clean install -Dcheckstyle.skip=true
+                    docker run -v "%CD%":/app -w /app maven:3.8.7 mvn clean install -Dcheckstyle.skip=true
                 '''
             }
         }
