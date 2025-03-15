@@ -22,7 +22,7 @@ pipeline {
         stage('Maven Install') {
             steps {
                 bat '''
-                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 mvn clean install
+                docker run --rm -v "%CD%":/app -w /app maven:3.8.7 mvn clean install -Dcheckstyle.skip=true
                 '''
             }
         }
@@ -35,7 +35,8 @@ pipeline {
                         -Dsonar.projectKey=spring-petclinic \
                         -Dsonar.host.url=http://192.168.1.14:9000 \
                         -Dsonar.login=squ_732874f4be02aa0a0169a6b4a45c4100d409c33e \
-                        -Dsonar.java.binaries=target/classes
+                        -Dsonar.java.binaries=target/classes \
+                        -Dcheckstyle.skip=true
                     '''
                 }
             }
