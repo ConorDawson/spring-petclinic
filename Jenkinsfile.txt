@@ -26,7 +26,7 @@ pipeline {
                     docker run --rm -v "%CD%":/app -w /app maven:3.8.7 mvn sonar:sonar \
                         -Dsonar.projectKey=spring-petclinic \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=your-sonarqube-token
+                        -Dsonar.login=squ_732874f4be02aa0a0169a6b4a45c4100d409c33e
                     '''
                 }
             }
