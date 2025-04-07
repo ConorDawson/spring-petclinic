@@ -27,7 +27,7 @@ pipeline {
             }
         }
 
-       /*
+       
 stage('Scan') {
     steps {
         withSonarQubeEnv('Spring_SonarQube') {
@@ -42,7 +42,7 @@ stage('Scan') {
         }
     }
 }
-*/
+
 
 
         stage('Docker Build') {
